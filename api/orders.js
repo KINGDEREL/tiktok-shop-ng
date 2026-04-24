@@ -1,15 +1,8 @@
 // TikTok Shop Orders API
 // Endpoints for order management with TikTok
 
-import { tiktokApiRequest, config } from './tiktok-auth.js';
+const { config, TIKTOK_API_BASE } = require('./tiktok-auth.js');
 
-export const config = {
-  api: {
-    bodyParser: true,
-  },
-};
-
-// Order status mapping
 const ORDER_STATUS_MAP = {
   'pending': 'UNPAID',
   'confirmed': 'CONFIRMED',
@@ -20,16 +13,29 @@ const ORDER_STATUS_MAP = {
   'refund': 'REFUND',
 };
 
+async function tiktokApiRequest(endpoint, options = {}) {
+  const response = await fetch(`${TIKTOK_API_BASE}${endpoint}`, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${config.accessToken}`,
+      'Content-Type': 'application/json',
+      'x-tiktok-shop-id': config.shopId,
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`TikTok API error: ${error}`);
+  }
+
+  return response.json();
+}
+
 // GET /api/orders - List orders
-export async function getOrders(req, res) {
+async function getOrders(req, res) {
   try {
-    const {
-      page = 1,
-      page_size = 20,
-      status,
-      start_date,
-      end_date,
-    } = req.query;
+    const { page = 1, page_size = 20, status, start_date, end_date } = req.query;
 
     let query = `/v2/order/list/?page=${page}&page_size=${page_size}`;
     if (status) query += `&status=${ORDER_STATUS_MAP[status] || status}`;
@@ -46,7 +52,7 @@ export async function getOrders(req, res) {
 }
 
 // GET /api/orders/:id - Get order details
-export async function getOrder(req, res) {
+async function getOrder(req, res) {
   try {
     const { id } = req.query;
 
@@ -61,57 +67,7 @@ export async function getOrder(req, res) {
   }
 }
 
-// POST /api/orders/:id/confirm - Confirm order
-export async function confirmOrder(req, res) {
-  try {
-    const { id } = req.query;
-
-    const response = await tiktokApiRequest(`/v2/order/confirm/${id}/`, {
-      method: 'POST',
-    });
-
-    return res.status(200).json(response);
-  } catch (error) {
-    console.error('Confirm order error:', error);
-    return res.status(500).json({ error: error.message });
-  }
-}
-
-// POST /api/orders/:id/cancel - Cancel order
-export async function cancelOrder(req, res) {
-  try {
-    const { id } = req.query;
-    const { reason } = req.body;
-
-    const response = await tiktokApiRequest(`/v2/order/cancel/${id}/`, {
-      method: 'POST',
-      body: JSON.stringify({ cancellation_reason: reason }),
-    });
-
-    return res.status(200).json(response);
-  } catch (error) {
-    console.error('Cancel order error:', error);
-    return res.status(500).json({ error: error.message });
-  }
-}
-
-// GET /api/orders/:id/tracking - Get tracking info
-export async function getOrderTracking(req, res) {
-  try {
-    const { id } = req.query;
-
-    const response = await tiktokApiRequest(`/v2/order/tracking/${id}/`, {
-      method: 'GET',
-    });
-
-    return res.status(200).json(response);
-  } catch (error) {
-    console.error('Get tracking error:', error);
-    return res.status(500).json({ error: error.message });
-  }
-}
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const { method } = req;
 
   switch (method) {
@@ -120,4 +76,4 @@ export default async function handler(req, res) {
     default:
       return res.status(405).json({ error: 'Method not allowed' });
   }
-}
+};

@@ -1,16 +1,29 @@
 // TikTok Shop Products API
 // Endpoints for product CRUD and sync with TikTok
 
-import { tiktokApiRequest, config } from './tiktok-auth.js';
+const { config, TIKTOK_API_BASE } = require('./tiktok-auth.js');
 
-export const config = {
-  api: {
-    bodyParser: true,
-  },
-};
+async function tiktokApiRequest(endpoint, options = {}) {
+  const response = await fetch(`${TIKTOK_API_BASE}${endpoint}`, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${config.accessToken}`,
+      'Content-Type': 'application/json',
+      'x-tiktok-shop-id': config.shopId,
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`TikTok API error: ${error}`);
+  }
+
+  return response.json();
+}
 
 // GET /api/products - List products
-export async function getProducts(req, res) {
+async function getProducts(req, res) {
   try {
     const { page = 1, page_size = 20, status } = req.query;
 
@@ -27,7 +40,7 @@ export async function getProducts(req, res) {
 }
 
 // POST /api/products - Create product
-export async function createProduct(req, res) {
+async function createProduct(req, res) {
   try {
     const product = req.body;
 
@@ -42,67 +55,6 @@ export async function createProduct(req, res) {
     return res.status(201).json(response);
   } catch (error) {
     console.error('Create product error:', error);
-    return res.status(500).json({ error: error.message });
-  }
-}
-
-// PUT /api/products/:id - Update product
-export async function updateProduct(req, res) {
-  try {
-    const { id } = req.query;
-    const product = req.body;
-
-    const response = await tiktokApiRequest(`/v2/product/update/${id}/`, {
-      method: 'PUT',
-      body: JSON.stringify(product),
-    });
-
-    return res.status(200).json(response);
-  } catch (error) {
-    console.error('Update product error:', error);
-    return res.status(500).json({ error: error.message });
-  }
-}
-
-// DELETE /api/products/:id - Delete product
-export async function deleteProduct(req, res) {
-  try {
-    const { id } = req.query;
-
-    const response = await tiktokApiRequest(`/v2/product/delete/${id}/`, {
-      method: 'DELETE',
-    });
-
-    return res.status(200).json(response);
-  } catch (error) {
-    console.error('Delete product error:', error);
-    return res.status(500).json({ error: error.message });
-  }
-}
-
-// POST /api/products/sync - Sync product to TikTok
-export async function syncProduct(req, res) {
-  try {
-    const { productId, localProductId } = req.body;
-
-    // First, get local product data
-    // Then create/update on TikTok
-    const tiktokResponse = await tiktokApiRequest('/v2/product/push/', {
-      method: 'POST',
-      body: JSON.stringify({
-        product_id: productId,
-        target_shop_id: config.shopId,
-      }),
-    });
-
-    return res.status(200).json({
-      success: true,
-      tiktokProductId: tiktokResponse.data?.product_id,
-      localProductId,
-      syncedAt: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error('Sync product error:', error);
     return res.status(500).json({ error: error.message });
   }
 }
@@ -139,7 +91,7 @@ function transformProductForTikTok(product) {
   };
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const { method } = req;
 
   switch (method) {
@@ -150,4 +102,4 @@ export default async function handler(req, res) {
     default:
       return res.status(405).json({ error: 'Method not allowed' });
   }
-}
+};

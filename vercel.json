@@ -1,5 +1,7 @@
 {
   "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ],
@@ -12,8 +14,5 @@
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
       ]
     }
-  ],
-  "github": {
-    "silent": true
-  }
+  ]
 }

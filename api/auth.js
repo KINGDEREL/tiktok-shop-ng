@@ -1,13 +1,7 @@
 // TikTok OAuth Callback Handler
-import { getTikTokAuthUrl, exchangeCodeForToken, isTikTokConfigured } from './tiktok-auth.js';
+const { getTikTokAuthUrl, exchangeCodeForToken, isTikTokConfigured } = require('./tiktok-auth.js');
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const { code, state, error } = req.query;
 
   // Handle OAuth errors
@@ -37,4 +31,4 @@ export default async function handler(req, res) {
     console.error('TikTok auth error:', err);
     return res.redirect(`/login?error=auth_failed`);
   }
-}
+};
