@@ -14,9 +14,9 @@ import {
   Activity, Database, Server, Zap, FileSpreadsheet, Ban, Play
 } from 'lucide-react'
 
-// Supabase configuration (placeholder - replace with actual credentials)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key'
+// Supabase configuration
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://iczfiefpgxoaayqgphwe.supabase.co'
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljemZpZWZwZ3hvYWF5cWdwaHdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDU5NzYsImV4cCI6MjA5MjYyMTk3Nn0.LDZphJ2X5NnBj0Tupbr1x0XSR08-DH53ViSDp11HP-U'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Context
@@ -136,7 +136,7 @@ function LandingPage() {
         <div className="header-content">
           <div className="logo" onClick={() => navigate('/')}>
             <span className="logo-icon">🎵</span>
-            <span className="logo-text">TikShop<span className="ng-badge">NG</span></span>
+            <span className="logo-text">ODDYSSEUS<span className="ng-badge">NG</span></span>
           </div>
           <div className="header-actions">
             <button className="data-toggle" onClick={() => setDataSaver(!dataSaver)}>
@@ -166,7 +166,7 @@ function LandingPage() {
         <div className="hero-visual">
           <motion.div className="phone-mockup" animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
             <div className="phone-screen">
-              <div className="app-header"><span>🎵 TikShop</span><span className="ng">NG</span></div>
+              <div className="app-header"><span>🎵 ODDYSSEUS</span><span className="ng">NG</span></div>
               <div className="app-product"><img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200" alt="" /><div className="product-info"><span>Pro Earbuds</span><span className="price">₦25,000</span></div></div>
             </div>
           </motion.div>
@@ -182,7 +182,7 @@ function LandingPage() {
         </div>
       </section>
 
-      <footer className="landing-footer"><div className="footer-content"><div className="footer-brand"><span className="logo-icon">🎵</span><span className="logo-text">TikShop<span className="ng-badge">NG</span></span></div><p>© 2024 TikShop NG.</p></div></footer>
+      <footer className="landing-footer"><div className="footer-content"><div className="footer-brand"><span className="logo-icon">🎵</span><span className="logo-text">ODDYSSEUS<span className="ng-badge">NG</span></span></div><p>© 2024 ODDYSSEUS NG.</p></div></footer>
     </motion.div>
   )
 }
@@ -214,7 +214,7 @@ function LoginPage() {
     <motion.div className="auth-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="auth-container">
         <motion.div className="auth-card" initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}>
-          <Link to="/" className="auth-logo"><span className="logo-icon">🎵</span><span className="logo-text">TikShop<span className="ng-badge">NG</span></span></Link>
+          <Link to="/" className="auth-logo"><span className="logo-icon">🎵</span><span className="logo-text">ODDYSSEUS<span className="ng-badge">NG</span></span></Link>
           <h1>Welcome Back</h1>
           <p>Login to your account</p>
           <form onSubmit={handleLogin}>
@@ -247,7 +247,7 @@ function RegisterPage() {
     <motion.div className="auth-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="auth-container">
         <motion.div className="auth-card register-card" initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}>
-          <Link to="/" className="auth-logo"><span className="logo-icon">🎵</span><span className="logo-text">TikShop<span className="ng-badge">NG</span></span></Link>
+          <Link to="/" className="auth-logo"><span className="logo-icon">🎵</span><span className="logo-text">ODDYSSEUS<span className="ng-badge">NG</span></span></Link>
           <h1>Create Account</h1><p>Step {step} of 3</p>
           <div className="step-progress"><div className={`step-dot ${step >= 1 ? 'active' : ''}`}>1</div><div className="step-line" /><div className={`step-dot ${step >= 2 ? 'active' : ''}`}>2</div><div className="step-line" /><div className={`step-dot ${step >= 3 ? 'active' : ''}`}>3</div></div>
           {step === 1 && <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}><div className="form-group"><label><Phone size={16} /> Phone Number</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+2348012345678" required /></div><motion.button className="btn-primary" onClick={handleSendOTP} whileHover={{ scale: 1.02 }} disabled={loading}>{loading ? <RefreshCw className="spin" size={18} /> : 'Send OTP'}</motion.button></motion.div>}
@@ -313,7 +313,7 @@ function AdminLoginPage() {
     <motion.div className="auth-page admin-auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="auth-container">
         <motion.div className="auth-card admin-card" initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}>
-          <div className="admin-logo"><ShieldCheck size={48} /><span>TikShop Admin</span></div>
+          <div className="admin-logo"><ShieldCheck size={48} /><span>ODDYSSEUS Admin</span></div>
           <h1>Admin Portal</h1>
           <p>Secure access for authorized personnel</p>
           {!showMfa ? (
