@@ -2756,3 +2756,173 @@ body {
     max-width: 100%;
   }
 }
+
+/* TikTok Button */
+.btn-tiktok {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background: linear-gradient(135deg, #000000, #25F4EE);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px 28px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 16px;
+}
+
+.btn-tiktok:hover {
+  box-shadow: 0 0 30px rgba(37, 244, 238, 0.4);
+}
+
+.hero-btn .tiktok-btn {
+  background: linear-gradient(135deg, #000000, #25F4EE);
+}
+
+.tiktok-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.divider span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Products Showcase */
+.products-showcase {
+  padding: 80px 40px;
+  background: var(--dark-secondary);
+  text-align: center;
+}
+
+.products-showcase h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.products-showcase > p {
+  color: var(--text-muted);
+  margin-bottom: 40px;
+}
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto 40px;
+}
+
+.showcase-product {
+  background: var(--surface);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 1px solid var(--border);
+}
+
+.showcase-product:hover {
+  border-color: var(--tiktok-cyan);
+}
+
+.showcase-product img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.showcase-info {
+  padding: 16px;
+}
+
+.showcase-info h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.showcase-info .seller-name {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.price-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.price-row .price {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--tiktok-pink);
+}
+
+.price-row .original {
+  font-size: 14px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: 2px solid var(--tiktok-cyan);
+  border-radius: 12px;
+  color: var(--tiktok-cyan);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px 28px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-outline:hover {
+  background: var(--tiktok-cyan);
+  color: var(--dark);
+}
+
+@media (max-width: 768px) {
+  .products-showcase {
+    padding: 60px 20px;
+  }
+
+  .showcase-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .showcase-grid {
+    grid-template-columns: 1fr;
+  }
+}

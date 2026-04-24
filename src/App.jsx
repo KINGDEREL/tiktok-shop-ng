@@ -154,7 +154,10 @@ function LandingPage() {
           <h1>Build Your TikTok Shop<br /><span className="gradient-text">In Minutes</span></h1>
           <p>The all-in-one platform to create, manage, and grow your TikTok Shop business in Nigeria.</p>
           <div className="hero-buttons">
-            <motion.button className="btn-primary" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => navigate('/register')}>Start Selling <ArrowRight size={18} /></motion.button>
+            <motion.button className="btn-primary tiktok-btn" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => navigate('/register')}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+              Sign up with TikTok
+            </motion.button>
             <motion.button className="btn-secondary" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => navigate('/login')}>Login</motion.button>
           </div>
           <div className="hero-stats">
@@ -172,6 +175,30 @@ function LandingPage() {
           </motion.div>
         </div>
       </motion.section>
+
+      {/* Products Showcase Section */}
+      <section className="products-showcase">
+        <h2>🔥 Trending Products from Our Sellers</h2>
+        <p>Discover amazing products from Nigerian sellers</p>
+        <div className="showcase-grid">
+          {MOCK_PRODUCTS.filter(p => p.status === 'active').slice(0, 6).map((product, i) => (
+            <motion.div key={product.id} className="showcase-product" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} whileHover={{ y: -5 }}>
+              <img src={product.image} alt={product.title} />
+              <div className="showcase-info">
+                <h3>{product.title}</h3>
+                <p className="seller-name">by {product.sellerName}</p>
+                <div className="price-row">
+                  <span className="price">₦{product.price.toLocaleString()}</span>
+                  <span className="original">₦{product.originalPrice.toLocaleString()}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        <motion.button className="btn-outline" whileHover={{ scale: 1.02 }} onClick={() => navigate('/register')}>
+          Start Selling Today <ArrowRight size={18} />
+        </motion.button>
+      </section>
 
       <section className="features-section">
         <h2>Everything You Need to Sell on TikTok</h2>
@@ -210,6 +237,12 @@ function LoginPage() {
     }, 1500)
   }
 
+  const handleTikTokLogin = () => {
+    // Simulate TikTok OAuth - in production, this would redirect to TikTok OAuth
+    alert('TikTok OAuth login would redirect to TikTok authorization. For demo, redirecting to seller dashboard.')
+    navigate('/dashboard')
+  }
+
   return (
     <motion.div className="auth-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="auth-container">
@@ -217,6 +250,14 @@ function LoginPage() {
           <Link to="/" className="auth-logo"><span className="logo-icon">🎵</span><span className="logo-text">ODDYSSEUS<span className="ng-badge">NG</span></span></Link>
           <h1>Welcome Back</h1>
           <p>Login to your account</p>
+
+          <motion.button className="btn-tiktok" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleTikTokLogin}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+            Continue with TikTok
+          </motion.button>
+
+          <div className="divider"><span>or</span></div>
+
           <form onSubmit={handleLogin}>
             <div className="form-group"><label><Mail size={16} /> Email</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seller@email.com" required /></div>
             <div className="form-group"><label><Lock size={16} /> Password</label><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter password" required /></div>
@@ -243,13 +284,32 @@ function RegisterPage() {
   const handleVerifyOTP = () => { setLoading(true); setTimeout(() => { setLoading(false); setStep(3) }, 1500) }
   const handleComplete = () => { setLoading(true); setTimeout(() => { navigate('/dashboard') }, 1500) }
 
+  const handleTikTokSignup = () => {
+    // Simulate TikTok OAuth - in production, this would redirect to TikTok OAuth
+    alert('TikTok OAuth signup would redirect to TikTok authorization. For demo, continuing with email registration.')
+    setStep(1)
+  }
+
   return (
     <motion.div className="auth-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="auth-container">
         <motion.div className="auth-card register-card" initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}>
           <Link to="/" className="auth-logo"><span className="logo-icon">🎵</span><span className="logo-text">ODDYSSEUS<span className="ng-badge">NG</span></span></Link>
-          <h1>Create Account</h1><p>Step {step} of 3</p>
-          <div className="step-progress"><div className={`step-dot ${step >= 1 ? 'active' : ''}`}>1</div><div className="step-line" /><div className={`step-dot ${step >= 2 ? 'active' : ''}`}>2</div><div className="step-line" /><div className={`step-dot ${step >= 3 ? 'active' : ''}`}>3</div></div>
+          <h1>Create Account</h1>
+
+          {step === 1 && (
+            <>
+              <p>Sign up with TikTok to get started instantly</p>
+              <motion.button className="btn-tiktok" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleTikTokSignup}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                Sign up with TikTok
+              </motion.button>
+              <div className="divider"><span>or continue with email</span></div>
+            </>
+          )}
+
+          {step > 1 && <p>Step {step} of 3</p>}
+          <div className="step-progress">{step > 1 && <><div className={`step-dot ${step >= 1 ? 'active' : ''}`}>1</div><div className="step-line" /><div className={`step-dot ${step >= 2 ? 'active' : ''}`}>2</div><div className="step-line" /><div className={`step-dot ${step >= 3 ? 'active' : ''}`}>3</div></>}</div>
           {step === 1 && <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}><div className="form-group"><label><Phone size={16} /> Phone Number</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+2348012345678" required /></div><motion.button className="btn-primary" onClick={handleSendOTP} whileHover={{ scale: 1.02 }} disabled={loading}>{loading ? <RefreshCw className="spin" size={18} /> : 'Send OTP'}</motion.button></motion.div>}
           {step === 2 && <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}><div className="form-group"><label><Check size={16} /> Enter OTP</label><input type="text" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="Enter 6-digit code" maxLength={6} required /></div><motion.button className="btn-primary" onClick={handleVerifyOTP} whileHover={{ scale: 1.02 }} disabled={loading}>{loading ? <RefreshCw className="spin" size={18} /> : 'Verify OTP'}</motion.button></motion.div>}
           {step === 3 && <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}><div className="account-type"><button className={`type-btn ${accountType === 'individual' ? 'active' : ''}`} onClick={() => setAccountType('individual')}><UserCheck size={24} /><span>Individual</span><small>NIN/BVN</small></button><button className={`type-btn ${accountType === 'business' ? 'active' : ''}`} onClick={() => setAccountType('business')}><Building2 size={24} /><span>Business</span><small>CAC</small></button></div><motion.button className="btn-primary" onClick={handleComplete} whileHover={{ scale: 1.02 }} disabled={loading}>{loading ? <RefreshCw className="spin" size={18} /> : 'Complete'}</motion.button></motion.div>}
