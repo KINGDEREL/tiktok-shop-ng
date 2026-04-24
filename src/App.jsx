@@ -129,6 +129,30 @@ const SettingsIcon = () => (
 function LandingPage() {
   const navigate = useNavigate()
   const { dataSaver, setDataSaver } = useContext(AppContext)
+  const [tiktokProducts, setTikTokProducts] = useState([])
+  const [productMode, setProductMode] = useState('demo')
+  const [loadingProducts, setLoadingProducts] = useState(true)
+
+  // Fetch TikTok products on mount
+  useEffect(() => {
+    const fetchTikTokProducts = async () => {
+      try {
+        const isProduction = window.location.hostname !== 'localhost';
+        const apiBase = isProduction ? '/api' : 'http://localhost:5173/api';
+        const response = await fetch(`${apiBase}/products-list`);
+        const data = await response.json();
+        if (data.success) {
+          setTikTokProducts(data.products?.slice(0, 8) || []);
+          setProductMode(data.mode || 'demo');
+        }
+      } catch (error) {
+        console.error('Failed to fetch TikTok products:', error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    fetchTikTokProducts();
+  }, []);
 
   return (
     <motion.div className="landing-page" initial="hidden" animate="visible" variants={staggerContainer}>
@@ -176,28 +200,37 @@ function LandingPage() {
         </div>
       </motion.section>
 
-      {/* Products Showcase Section */}
+      {/* Products Showcase Section - Fetched from TikTok */}
       <section className="products-showcase">
-        <h2>🔥 Trending Products from Our Sellers</h2>
-        <p>Discover amazing products from Nigerian sellers</p>
+        <h2>🔥 Trending Products from TikTok Shop</h2>
+        <p>Discover amazing products from Nigerian TikTok sellers</p>
         <div className="showcase-grid">
-          {MOCK_PRODUCTS.filter(p => p.status === 'active').slice(0, 6).map((product, i) => (
+          {tiktokProducts.map((product, i) => (
             <motion.div key={product.id} className="showcase-product" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} whileHover={{ y: -5 }}>
               <img src={product.image} alt={product.title} />
               <div className="showcase-info">
                 <h3>{product.title}</h3>
-                <p className="seller-name">by {product.sellerName}</p>
+                <p className="seller-name">by {product.seller}</p>
                 <div className="price-row">
-                  <span className="price">₦{product.price.toLocaleString()}</span>
-                  <span className="original">₦{product.originalPrice.toLocaleString()}</span>
+                  <span className="price">₦{product.price?.toLocaleString()}</span>
+                  <span className="original">₦{product.originalPrice?.toLocaleString()}</span>
+                </div>
+                <div className="product-meta">
+                  <span className="rating">★ {product.rating}</span>
+                  <span className="sales">{product.sales} sold</span>
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
-        <motion.button className="btn-outline" whileHover={{ scale: 1.02 }} onClick={() => navigate('/register')}>
-          Start Selling Today <ArrowRight size={18} />
-        </motion.button>
+        <div className="showcase-footer">
+          <motion.button className="btn-outline" whileHover={{ scale: 1.02 }} onClick={() => navigate('/register')}>
+            Start Selling Today <ArrowRight size={18} />
+          </motion.button>
+          <span className="sync-badge">
+            {productMode === 'live' ? '✓ Live TikTok Shop' : '📱 Demo Mode'}
+          </span>
+        </div>
       </section>
 
       <section className="features-section">
@@ -281,7 +314,6 @@ function LoginPage() {
             <motion.button type="submit" className="btn-primary" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} disabled={loading}>{loading ? <RefreshCw className="spin" size={18} /> : 'Login'}</motion.button>
           </form>
           <p className="auth-footer">Don't have an account? <Link to="/register">Sign up</Link></p>
-          <div className="admin-login-hint"><Link to="/admin-login">Admin Login</Link></div>
         </motion.div>
       </div>
     </motion.div>
