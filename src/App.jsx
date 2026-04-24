@@ -238,9 +238,26 @@ function LoginPage() {
   }
 
   const handleTikTokLogin = () => {
-    // Simulate TikTok OAuth - in production, this would redirect to TikTok OAuth
-    alert('TikTok OAuth login would redirect to TikTok authorization. For demo, redirecting to seller dashboard.')
-    navigate('/dashboard')
+    // Real TikTok OAuth - redirect to API endpoint
+    const isProduction = window.location.hostname !== 'localhost';
+    const apiBase = isProduction ? '/api' : 'http://localhost:5173/api';
+
+    // Check if TikTok credentials are configured
+    const tiktokConfigured = localStorage.getItem('tiktok_configured') === 'true';
+
+    if (!tiktokConfigured) {
+      // Show configuration modal or redirect to settings
+      if (confirm('TikTok integration not configured. Would you like to set it up now?')) {
+        navigate('/settings?setup=tiktok');
+      } else {
+        // Continue with demo mode
+        navigate('/dashboard');
+      }
+      return;
+    }
+
+    // Redirect to TikTok OAuth
+    window.location.href = `${apiBase}/auth`;
   }
 
   return (
@@ -285,9 +302,22 @@ function RegisterPage() {
   const handleComplete = () => { setLoading(true); setTimeout(() => { navigate('/dashboard') }, 1500) }
 
   const handleTikTokSignup = () => {
-    // Simulate TikTok OAuth - in production, this would redirect to TikTok OAuth
-    alert('TikTok OAuth signup would redirect to TikTok authorization. For demo, continuing with email registration.')
-    setStep(1)
+    // Real TikTok OAuth - redirect to API endpoint for seller registration
+    const isProduction = window.location.hostname !== 'localhost';
+    const apiBase = isProduction ? '/api' : 'http://localhost:5173/api';
+
+    // Check if TikTok credentials are configured
+    const tiktokConfigured = localStorage.getItem('tiktok_configured') === 'true';
+
+    if (!tiktokConfigured) {
+      if (confirm('TikTok integration not configured. Set it up now to sell on TikTok Shop?')) {
+        navigate('/settings?setup=tiktok');
+      }
+      return;
+    }
+
+    // Redirect to TikTok OAuth for seller authorization
+    window.location.href = `${apiBase}/auth`;
   }
 
   return (
@@ -969,7 +999,78 @@ function AdminSettings() {
   )
 }
 
-// Seller Dashboard (existing component kept for reference)
+// Seller Dashboard Page
+function DashboardPage() {
+  const navigate = useNavigate()
+  const { user, isAdmin } = useContext(AppContext)
+  const [activeTab, setActiveTab] = useState('overview')
+
+  // Redirect if not logged in or is admin
+  useEffect(() => {
+    if (!user) {
+      navigate('/login')
+    } else if (isAdmin) {
+      navigate('/admin')
+    }
+  }, [user, isAdmin, navigate])
+
+  if (!user) return null
+
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'products', label: 'Products', icon: Package },
+    { id: 'orders', label: 'Orders', icon: ShoppingCart },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'payments', label: 'Payments', icon: CreditCard },
+    { id: 'creators', label: 'Creators', icon: Users },
+    { id: 'settings', label: 'Settings', icon: Settings },
+  ]
+
+  return (
+    <div className="dashboard-layout">
+      <aside className="sidebar">
+        <div className="sidebar-header">
+          <Link to="/" className="sidebar-logo"><span className="logo-icon">🎵</span><span className="logo-text">TikShop<span className="ng-badge">NG</span></span></Link>
+        </div>
+        <nav className="sidebar-nav">
+          {tabs.map(tab => (
+            <motion.button key={tab.id} className={`nav-item ${activeTab === tab.id ? 'active' : ''}`} onClick={() => {
+              if (tab.id === 'settings') {
+                navigate('/settings')
+              } else {
+                setActiveTab(tab.id)
+              }
+            }} whileHover={{ x: 4 }}><tab.icon size={18} /><span>{tab.label}</span></motion.button>
+          ))}
+        </nav>
+        <div className="sidebar-footer">
+          <button className="logout-btn" onClick={() => { localStorage.clear(); window.location.href = '/' }}><LogOut size={18} /> Logout</button>
+        </div>
+      </aside>
+      <main className="dashboard-main">
+        <header className="dashboard-header">
+          <div className="header-left"><h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1></div>
+          <div className="header-right">
+            <button className="icon-btn"><Bell size={20} /><span className="notification-dot" /></button>
+            <Link to="/settings" className="user-profile"><div className="avatar">{user?.name?.[0] || 'S'}</div><span>{user?.name}</span></Link>
+          </div>
+        </header>
+        <div className="dashboard-content">
+          <AnimatePresence mode="wait">
+            {activeTab === 'overview' && <DashboardOverview key="overview" />}
+            {activeTab === 'products' && <ProductManagement key="products" />}
+            {activeTab === 'orders' && <OrderManagement key="orders" />}
+            {activeTab === 'analytics' && <SellerAnalytics key="analytics" />}
+            {activeTab === 'payments' && <PaymentSettlement key="payments" />}
+            {activeTab === 'creators' && <CreatorTools key="creators" />}
+          </AnimatePresence>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// Seller Dashboard Overview
 function DashboardOverview() {
   const stats = [
     { label: 'Total Revenue', value: 1250000, icon: DollarSign, color: 'cyan', prefix: '₦' },
@@ -985,6 +1086,382 @@ function DashboardOverview() {
         {stats.map((stat, i) => (<motion.div key={i} className="stat-card" variants={staggerItem} whileHover={{ y: -5 }}><div className={`stat-icon ${stat.color}`}><stat.icon size={22} /></div><div className="stat-content"><span className="stat-label">{stat.label}</span><span className="stat-value">{stat.prefix}<AnimatedCounter value={stat.value} /></span></div></motion.div>))}
       </div>
     </motion.div>
+  )
+}
+
+// Settings Page - TikTok Integration Configuration
+function SettingsPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { user } = useContext(AppContext)
+  const [activeSection, setActiveSection] = useState('tiktok')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  // TikTok Configuration State
+  const [tiktokConfig, setTikTokConfig] = useState({
+    clientId: localStorage.getItem('tiktok_client_id') || '',
+    clientSecret: localStorage.getItem('tiktok_client_secret') || '',
+    merchantId: localStorage.getItem('tiktok_merchant_id') || '',
+    shopId: localStorage.getItem('tiktok_shop_id') || '',
+    accessToken: localStorage.getItem('tiktok_access_token') || '',
+    refreshToken: localStorage.getItem('tiktok_refresh_token') || '',
+    connected: localStorage.getItem('tiktok_connected') === 'true',
+  })
+
+  // Fulfillment Configuration State
+  const [fulfillmentConfig, setFulfillmentConfig] = useState({
+    method: localStorage.getItem('fulfillment_method') || 'ship_by_seller',
+    warehouse: localStorage.getItem('warehouse_id') || '',
+    warehouseName: localStorage.getItem('warehouse_name') || '',
+    warehouseAddress: localStorage.getItem('warehouse_address') || '',
+    logisticsProvider: localStorage.getItem('logistics_provider') || '',
+    logisticsProviderName: localStorage.getItem('logistics_provider_name') || '',
+  })
+
+  const [warehouseForm, setWarehouseForm] = useState({
+    name: '',
+    address: '',
+    city: '',
+    state: '',
+    contactName: '',
+    phone: '',
+    email: '',
+  })
+
+  const handleSaveTikTokConfig = async () => {
+    setSaving(true)
+    try {
+      // In production, this would validate with TikTok API
+      localStorage.setItem('tiktok_client_id', tiktokConfig.clientId)
+      localStorage.setItem('tiktok_client_secret', tiktokConfig.clientSecret)
+      localStorage.setItem('tiktok_merchant_id', tiktokConfig.merchantId)
+      localStorage.setItem('tiktok_shop_id', tiktokConfig.shopId)
+      localStorage.setItem('tiktok_access_token', tiktokConfig.accessToken)
+      localStorage.setItem('tiktok_refresh_token', tiktokConfig.refreshToken)
+      localStorage.setItem('tiktok_configured', 'true')
+
+      setTikTokConfig(prev => ({ ...prev, connected: true }))
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (error) {
+      alert('Failed to save configuration: ' + error.message)
+    }
+    setSaving(false)
+  }
+
+  const handleTikTokConnect = async () => {
+    // Trigger TikTok OAuth flow
+    const isProduction = window.location.hostname !== 'localhost';
+    const apiBase = isProduction ? '/api' : 'http://localhost:5173/api';
+    window.location.href = `${apiBase}/auth`;
+  }
+
+  const handleSaveFulfillment = async () => {
+    setSaving(true)
+    try {
+      localStorage.setItem('fulfillment_method', fulfillmentConfig.method)
+      localStorage.setItem('warehouse_id', fulfillmentConfig.warehouse)
+      localStorage.setItem('warehouse_name', fulfillmentConfig.warehouseName)
+      localStorage.setItem('warehouse_address', fulfillmentConfig.warehouseAddress)
+      localStorage.setItem('logistics_provider', fulfillmentConfig.logisticsProvider)
+      localStorage.setItem('logistics_provider_name', fulfillmentConfig.logisticsProviderName)
+
+      // In production, call API to register warehouse with TikTok
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (error) {
+      alert('Failed to save fulfillment settings: ' + error.message)
+    }
+    setSaving(false)
+  }
+
+  // Redirect if not logged in
+  if (!user) {
+    useEffect(() => { navigate('/login') }, [])
+    return null
+  }
+
+  return (
+    <div className="settings-page">
+      <div className="settings-container">
+        <motion.div className="settings-header" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+          <h1>Settings</h1>
+          <p>Configure your TikTok Shop integration and fulfillment settings</p>
+        </motion.div>
+
+        <div className="settings-sections">
+          <div className="settings-nav">
+            <button className={activeSection === 'tiktok' ? 'active' : ''} onClick={() => setActiveSection('tiktok')}>
+              <Shield size={18} /> TikTok Integration
+            </button>
+            <button className={activeSection === 'fulfillment' ? 'active' : ''} onClick={() => setActiveSection('fulfillment')}>
+              <Truck size={18} /> Fulfillment
+            </button>
+            <button className={activeSection === 'account' ? 'active' : ''} onClick={() => setActiveSection('account')}>
+              <User size={18} /> Account
+            </button>
+          </div>
+
+          <div className="settings-content">
+            {activeSection === 'tiktok' && (
+              <motion.div className="settings-panel" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                <h2><Shield size={20} /> TikTok Shop Integration</h2>
+                <p className="settings-desc">Connect your TikTok Shop account to sync products, orders, and inventory.</p>
+
+                {tiktokConfig.connected ? (
+                  <div className="connected-badge">
+                    <CheckCircle size={18} /> Connected to TikTok Shop
+                  </div>
+                ) : (
+                  <div className="connect-prompt">
+                    <p>Connect your TikTok Shop account to start selling.</p>
+                    <motion.button className="btn-tiktok" whileHover={{ scale: 1.02 }} onClick={handleTikTokConnect}>
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                      Connect TikTok Shop
+                    </motion.button>
+                  </div>
+                )}
+
+                <div className="config-form">
+                  <h3>API Configuration</h3>
+                  <div className="form-group">
+                    <label>Client ID</label>
+                    <input type="text" value={tiktokConfig.clientId} onChange={(e) => setTikTokConfig({ ...tiktokConfig, clientId: e.target.value })} placeholder="Enter TikTok Client ID" />
+                  </div>
+                  <div className="form-group">
+                    <label>Client Secret</label>
+                    <input type="password" value={tiktokConfig.clientSecret} onChange={(e) => setTikTokConfig({ ...tiktokConfig, clientSecret: e.target.value })} placeholder="Enter TikTok Client Secret" />
+                  </div>
+                  <div className="form-group">
+                    <label>Merchant ID</label>
+                    <input type="text" value={tiktokConfig.merchantId} onChange={(e) => setTikTokConfig({ ...tiktokConfig, merchantId: e.target.value })} placeholder="Enter Merchant ID" />
+                  </div>
+                  <div className="form-group">
+                    <label>Shop ID</label>
+                    <input type="text" value={tiktokConfig.shopId} onChange={(e) => setTikTokConfig({ ...tiktokConfig, shopId: e.target.value })} placeholder="Enter Shop ID" />
+                  </div>
+                  <div className="form-group">
+                    <label>Access Token</label>
+                    <input type="password" value={tiktokConfig.accessToken} onChange={(e) => setTikTokConfig({ ...tiktokConfig, accessToken: e.target.value })} placeholder="Access Token (optional if using OAuth)" />
+                  </div>
+
+                  <div className="form-actions">
+                    <motion.button className="btn-primary" onClick={handleSaveTikTokConfig} disabled={saving} whileHover={{ scale: 1.02 }}>
+                      {saving ? <RefreshCw className="spin" size={18} /> : saved ? <Check size={18} /> : 'Save Configuration'}
+                    </motion.button>
+                  </div>
+                </div>
+
+                <div className="settings-help">
+                  <h4>How to get credentials:</h4>
+                  <ol>
+                    <li>Go to <a href="https://partner.tiktokshop.com" target="_blank" rel="noopener">TikTok Partner Center</a></li>
+                    <li>Create a seller account or use existing</li>
+                    <li>Navigate to Apps → Create App</li>
+                    <li>Copy Client ID and Client Secret</li>
+                    <li>Set callback URL to: <code>https://your-domain.com/api/auth</code></li>
+                  </ol>
+                </div>
+              </motion.div>
+            )}
+
+            {activeSection === 'fulfillment' && (
+              <motion.div className="settings-panel" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                <h2><Truck size={20} /> Fulfillment Settings</h2>
+                <p className="settings-desc">Configure how orders are fulfilled and shipped to customers.</p>
+
+                <div className="config-form">
+                  <h3>Fulfillment Method</h3>
+                  <div className="fulfillment-options">
+                    <label className={`option-card ${fulfillmentConfig.method === 'ship_by_tiktok' ? 'selected' : ''}`}>
+                      <input type="radio" name="fulfillment" value="ship_by_tiktok" checked={fulfillmentConfig.method === 'ship_by_tiktok'} onChange={() => setFulfillmentConfig({ ...fulfillmentConfig, method: 'ship_by_tiktok' })} />
+                      <div className="option-icon"><Package size={24} /></div>
+                      <div className="option-text">
+                        <strong>Ship by TikTok</strong>
+                        <span>TikTok handles warehousing and shipping</span>
+                      </div>
+                    </label>
+                    <label className={`option-card ${fulfillmentConfig.method === 'ship_by_seller' ? 'selected' : ''}`}>
+                      <input type="radio" name="fulfillment" value="ship_by_seller" checked={fulfillmentConfig.method === 'ship_by_seller'} onChange={() => setFulfillmentConfig({ ...fulfillmentConfig, method: 'ship_by_seller' })} />
+                      <div className="option-icon"><Truck size={24} /></div>
+                      <div className="option-text">
+                        <strong>Ship by Seller</strong>
+                        <span>You handle shipping with your own logistics</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  {fulfillmentConfig.method === 'ship_by_seller' && (
+                    <>
+                      <h3>Warehouse Details</h3>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Warehouse Name</label>
+                          <input type="text" value={warehouseForm.name} onChange={(e) => setWarehouseForm({ ...warehouseForm, name: e.target.value })} placeholder="Main Warehouse" />
+                        </div>
+                        <div className="form-group">
+                          <label>Contact Name</label>
+                          <input type="text" value={warehouseForm.contactName} onChange={(e) => setWarehouseForm({ ...warehouseForm, contactName: e.target.value })} placeholder="Warehouse Manager" />
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>Address</label>
+                        <input type="text" value={warehouseForm.address} onChange={(e) => setWarehouseForm({ ...warehouseForm, address: e.target.value })} placeholder="Full address" />
+                      </div>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>City</label>
+                          <input type="text" value={warehouseForm.city} onChange={(e) => setWarehouseForm({ ...warehouseForm, city: e.target.value })} placeholder="Lagos" />
+                        </div>
+                        <div className="form-group">
+                          <label>State</label>
+                          <input type="text" value={warehouseForm.state} onChange={(e) => setWarehouseForm({ ...warehouseForm, state: e.target.value })} placeholder="Lagos" />
+                        </div>
+                      </div>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Phone</label>
+                          <input type="tel" value={warehouseForm.phone} onChange={(e) => setWarehouseForm({ ...warehouseForm, phone: e.target.value })} placeholder="+2348012345678" />
+                        </div>
+                        <div className="form-group">
+                          <label>Email</label>
+                          <input type="email" value={warehouseForm.email} onChange={(e) => setWarehouseForm({ ...warehouseForm, email: e.target.value })} placeholder="warehouse@email.com" />
+                        </div>
+                      </div>
+
+                      <h3>Logistics Provider</h3>
+                      <div className="logistics-providers">
+                        {[
+                          { id: 'dhl', name: 'DHL Express', logo: '📦' },
+                          { id: 'fedex', name: 'FedEx', logo: '✈️' },
+                          { id: 'ups', name: 'UPS', logo: '🚚' },
+                          { id: 'local', name: 'Local Courier (NG)', logo: '🏍️' },
+                        ].map(provider => (
+                          <label key={provider.id} className={`provider-card ${fulfillmentConfig.logisticsProvider === provider.id ? 'selected' : ''}`}>
+                            <input type="radio" name="logistics" value={provider.id} checked={fulfillmentConfig.logisticsProvider === provider.id} onChange={() => setFulfillmentConfig({ ...fulfillmentConfig, logisticsProvider: provider.id, logisticsProviderName: provider.name })} />
+                            <span className="provider-logo">{provider.logo}</span>
+                            <span className="provider-name">{provider.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  <div className="form-actions">
+                    <motion.button className="btn-primary" onClick={handleSaveFulfillment} disabled={saving} whileHover={{ scale: 1.02 }}>
+                      {saving ? <RefreshCw className="spin" size={18} /> : saved ? <Check size={18} /> : 'Save Fulfillment Settings'}
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeSection === 'account' && (
+              <motion.div className="settings-panel" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                <h2><User size={20} /> Account Settings</h2>
+                <p className="settings-desc">Manage your account information and preferences.</p>
+
+                <div className="config-form">
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input type="email" value={user.email} disabled />
+                  </div>
+                  <div className="form-group">
+                    <label>Shop Name</label>
+                    <input type="text" defaultValue={user.tiktokShop || ''} placeholder="Your TikTok Shop Name" />
+                  </div>
+                  <div className="form-group">
+                    <label>Bank Account</label>
+                    <input type="text" defaultValue={user.bankAccount || ''} placeholder="Bank - Account Number" />
+                  </div>
+                  <div className="form-actions">
+                    <motion.button className="btn-primary" whileHover={{ scale: 1.02 }}>
+                      Update Account
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Auth Callback Page - Handles OAuth redirect
+function AuthCallbackPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [status, setStatus] = useState('processing')
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const success = params.get('auth_success')
+    const error = params.get('error')
+    const tokens = params.get('tokens')
+
+    if (error) {
+      setStatus('error')
+      setTimeout(() => {
+        alert('Authentication failed: ' + error)
+        navigate('/login?error=' + error)
+      }, 2000)
+      return
+    }
+
+    if (success && tokens) {
+      try {
+        // Decode tokens (in production, verify server-side)
+        const tokenData = JSON.parse(Buffer.from(tokens, 'base64').toString())
+        localStorage.setItem('tiktok_access_token', tokenData.access_token)
+        localStorage.setItem('tiktok_refresh_token', tokenData.refresh_token)
+        localStorage.setItem('tiktok_connected', 'true')
+        localStorage.setItem('tiktok_configured', 'true')
+        setStatus('success')
+      } catch (e) {
+        setStatus('error')
+        return
+      }
+
+      setTimeout(() => {
+        navigate('/settings?connected=true')
+      }, 2000)
+    } else {
+      setStatus('error')
+      setTimeout(() => {
+        navigate('/login')
+      }, 2000)
+    }
+  }, [location, navigate])
+
+  return (
+    <div className="auth-callback-page">
+      <div className="callback-content">
+        {status === 'processing' && (
+          <>
+            <RefreshCw className="spin" size={48} />
+            <h2>Connecting to TikTok...</h2>
+            <p>Please wait while we complete the authentication.</p>
+          </>
+        )}
+        {status === 'success' && (
+          <>
+            <CheckCircle size={48} className="success-icon" />
+            <h2>Successfully Connected!</h2>
+            <p>Redirecting to settings...</p>
+          </>
+        )}
+        {status === 'error' && (
+          <>
+            <XCircle size={48} className="error-icon" />
+            <h2>Authentication Failed</h2>
+            <p>Redirecting to login...</p>
+          </>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -1041,6 +1518,9 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/admin-login" element={<AdminLoginPage />} />
           <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <AdminLoginPage />} />
+          <Route path="/dashboard" element={user ? <DashboardPage /> : <LoginPage />} />
+          <Route path="/settings" element={user ? <SettingsPage /> : <LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
         </Routes>
       </BrowserRouter>
     </AppContext.Provider>

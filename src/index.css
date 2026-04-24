@@ -2926,3 +2926,329 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Settings Page */
+.settings-page {
+  min-height: 100vh;
+  background: var(--dark);
+  padding: 100px 20px 40px;
+}
+
+.settings-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.settings-header {
+  margin-bottom: 40px;
+}
+
+.settings-header h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.settings-header p {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.settings-sections {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 30px;
+}
+
+.settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-nav button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: left;
+}
+
+.settings-nav button:hover {
+  background: var(--surface);
+  color: var(--white);
+}
+
+.settings-nav button.active {
+  background: linear-gradient(135deg, var(--tiktok-cyan), var(--tiktok-pink));
+  color: var(--dark);
+}
+
+.settings-content {
+  min-height: 500px;
+}
+
+.settings-panel {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 30px;
+}
+
+.settings-panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.settings-desc {
+  color: var(--text-muted);
+  margin-bottom: 30px;
+}
+
+.connected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(0, 210, 106, 0.15);
+  border: 1px solid var(--success);
+  border-radius: 30px;
+  color: var(--success);
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+.connect-prompt {
+  padding: 30px;
+  background: var(--dark-secondary);
+  border-radius: 16px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.connect-prompt p {
+  margin-bottom: 20px;
+  color: var(--text-muted);
+}
+
+.config-form {
+  margin-top: 30px;
+}
+
+.config-form h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-actions {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.fulfillment-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.option-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--dark-secondary);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.option-card:hover {
+  border-color: var(--tiktok-cyan);
+}
+
+.option-card.selected {
+  border-color: var(--tiktok-cyan);
+  background: rgba(0, 242, 234, 0.05);
+}
+
+.option-card input {
+  display: none;
+}
+
+.option-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border-radius: 12px;
+  color: var(--tiktok-cyan);
+}
+
+.option-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.option-text strong {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.option-text span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.logistics-providers {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.provider-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 12px;
+  background: var(--dark-secondary);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.provider-card:hover {
+  border-color: var(--tiktok-pink);
+}
+
+.provider-card.selected {
+  border-color: var(--tiktok-pink);
+  background: rgba(255, 0, 80, 0.05);
+}
+
+.provider-card input {
+  display: none;
+}
+
+.provider-logo {
+  font-size: 28px;
+}
+
+.provider-name {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.settings-help {
+  margin-top: 30px;
+  padding: 20px;
+  background: var(--dark-secondary);
+  border-radius: 12px;
+}
+
+.settings-help h4 {
+  font-size: 14px;
+  margin-bottom: 12px;
+  color: var(--tiktok-cyan);
+}
+
+.settings-help ol {
+  padding-left: 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.settings-help code {
+  display: block;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-radius: 6px;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+/* Auth Callback Page */
+.auth-callback-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dark);
+}
+
+.callback-content {
+  text-align: center;
+}
+
+.callback-content h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 28px;
+  margin: 20px 0 10px;
+}
+
+.callback-content p {
+  color: var(--text-muted);
+}
+
+.callback-content .success-icon {
+  color: var(--success);
+}
+
+.callback-content .error-icon {
+  color: var(--error);
+}
+
+@media (max-width: 768px) {
+  .settings-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+
+  .settings-nav button {
+    white-space: nowrap;
+  }
+
+  .fulfillment-options,
+  .logistics-providers {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
